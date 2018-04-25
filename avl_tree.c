@@ -49,7 +49,8 @@ avl_tree_insert(avl_tree_t *tree, avl_tree_node_t *node)
 
 	sentinel = tree->sentinel;
 	root = tree->root;
-	if(sentinel == root){// dirctly insert 
+	/* avl-tree is empty and directly insert */
+	if(sentinel == root){ 
 		node->parent = NULL;
 		node->left_child = sentinel;
 		node->right_child = sentinel;
@@ -57,14 +58,15 @@ avl_tree_insert(avl_tree_t *tree, avl_tree_node_t *node)
 		root = node;
 		return;
 	}
-
+	/* insert a node using BST feature */
 	first_bf = tree->insert_func(tree, node);
-	/*re-balance avl-tree*/	
+
+	/* re-balance avl-tree if necessary */	
 	while(first_bf != sentinel){
 		if(avl_tree_get_height(first_bf->left_height, sentinel) > avl_tree_get_height(first_bf->right_height, sentinel)){//L
 			temp = first_bf->left_child;
 			if(avl_tree_get_height(temp->left_height, sentinel) > avl_tree_get_height(temp->right_height, sentinel)){//L
-				/*LL type, just a step : right rotate */
+				/* LL type, just a step : right rotate */
 				avl_tree_right_rotate(&root, first_bf, sentinel);
 			}else{//R
 				/* LR type, two step : firstly left ratate and right rotate */
@@ -77,10 +79,11 @@ avl_tree_insert(avl_tree_t *tree, avl_tree_node_t *node)
 				avl_tree_right_rotate(&root, first_bf->left_child, sentinel);
 				avl_tree_left_rotate(&root,first_bf,sentinel)
 			}else{//R
-				/*RR type, just a  step: left rotate */
+				/* RR type, just a  step: left rotate */
 				avl_tree_left_rotate(&root, first_bf, sentinel);
 			}
 		}
+		/* via back-track algorithm to recompute children' height and get other unbalanced node */
 		first_bf = avl_tree_back_track_recompute_children_height(root, node, sentinel);
 	}
 }
@@ -92,7 +95,7 @@ avl_tree_delete(avl_tree_t *tree, avl_tree_node_t *node)
 
 }
 
-/*insert a node into tree in BST way*/
+/* insert a node into tree in BST way */
 avl_tree_node_t*
 bst_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 {
@@ -106,11 +109,11 @@ bst_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 	 node->left_child = node->right_child = tree->sentinel;
 	 node->height = 1;
 
-	 /*recompute children' height in back-strack way*/
-	 return avl_tree_back_track_recompute_children_height(tree->root, node, tree->sentinel);
+	/* via back-track algorithm to recompute children' height and get other unbalanced node */
+	return avl_tree_back_track_recompute_children_height(tree->root, node, tree->sentinel);
 }
 
-/*RR*/
+/* left rotate */
 static inline void
 avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node_t *sentinel)
 {
@@ -133,16 +136,14 @@ avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node
 	}else{
 		node->parent->right_child = temp;
 	}
-	temp->parent = node->parent;
 
+	temp->parent = node->parent;
 	temp->left_child = node;
 	node->parent = temp;
 
-	/*back-track algorithm recompute children' height */
-	return avl_tree_back_track_recompute_children_height(*root, node, sentinel);
 }
 
-/*LL*/
+/* right rotate */
 static inline void
 avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node_t *sentinel)
 {
@@ -155,6 +156,7 @@ avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_nod
 	if(sentinel != temp->right_child){
 		temp->right_child->parent = node;
 	}
+	
 	node->left_child = temp->right_child;
 
 	if(node == *root){
@@ -164,15 +166,13 @@ avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_nod
 	}else{
 		node->parent->right_child = temp;
 	}
-	temp->parent = node->parent;
 
+	temp->parent = node->parent;
 	temp->right_child = node;
 	node->parent = temp;
-
-	/*back-track algorithm recompute children' height */
-	return avl_tree_back_track_recompute_children_height(*root, node, sentinel);
 }
 
+/* get height of child tree */
 static inline int
 avl_tree_get_height(avl_tree_node_t *node, avl_tree_node_t *sentinel)
 {
@@ -188,6 +188,7 @@ end:
 
 }
 
+/* via back-strack method to recompute height of tree */
 static inline avl_tree_node_t*
 avl_tree_back_track_recompute_children_height(avl_tree_node_t *root, avl_tree_node_t *current, avl_tree_node_t *sentinel)
 {
