@@ -10,30 +10,79 @@
 
 #include "avl_tree.h"
 
+#define avl_tree_init_sentinel(s)	\
+		(s)->parent = NULL;	\
+		(s)->left_child = NULL;	\
+		(s)->right_child = NULL;	\
+		(s)->height = 0;	\
 
-static inline void avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node);
+static inline void avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_node_t *sentinel);
 
-static inline void avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node);
+static inline void avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_node_t *sentinel);
 
-static inline int avl_tree_child_height_max(avl_tree_node_t *node);
+static inline int avl_tree_get_height(avl_tree_node_t *node, avl_tree_node_t *sentinel);
 
-static inline void avl_tree_back_track_recompute_children_height(avl_tree_node_t *root, avl_tree_node_t *current);
+static inline avl_tree_node_t* avl_tree_back_track_recompute_children_height(avl_tree_node_t *root, avl_tree_node_t *current, avl_tree_node_t *sentinel);
 
+static inline 
 /*init a avl-tree root*/
 void
-avl_tree_init(avl_tree_t *tree, avl_tree_node_insert_func i_func)
+avl_tree_init(avl_tree_t *tree, avl_tree_node_t *sentinel, avl_tree_node_insert_func i_func)
 {
 	if(NULL == tree){
 		return;
 	}
-	tree->inset_func = ifunc
+	avl_tree_init_sentinel(sentinel);
+	tree->sentinel = sentinel;
+	tree->insert_func = i_func;
+	tree->root = sentinel;
 }
 
 /*insert a node into avl-tree */
 void
 avl_tree_insert(avl_tree_t *tree, avl_tree_node_t *node)
 {
+	if(NULL == tree){
+		return ;
+	}
+	avl_tree_node_t *sentinel, *temp, *root, *first_bf;
 
+	sentinel = tree->sentinel;
+	root = tree->root;
+	if(sentinel == root){// dirctly insert 
+		node->parent = NULL;
+		node->left_child = sentinel;
+		node->right_child = sentinel;
+		node->height = 1;
+		root = node;
+		return;
+	}
+
+	first_bf = tree->insert_func(tree, node);
+	/*re-balance avl-tree*/	
+	while(first_bf != sentinel){
+		if(avl_tree_get_height(first_bf->left_height, sentinel) > avl_tree_get_height(first_bf->right_height, sentinel)){//L
+			temp = first_bf->left_child;
+			if(avl_tree_get_height(temp->left_height, sentinel) > avl_tree_get_height(temp->right_height, sentinel)){//L
+				/*LL type, just a step : right rotate */
+				avl_tree_right_rotate(&root, first_bf, sentinel);
+			}else{//R
+				/* LR type, two step : firstly left ratate and right rotate */
+				avl_tree_left_rotate(&root,first_bf->right_child,sentinel)
+				avl_tree_right_rotate(&root, first_bf, sentinel);
+			}
+		}else{//R
+			if(avl_tree_get_height(temp->left_height, sentinel) > avl_tree_get_height(temp->right_height, sentinel)){//L
+				/* RL type, two step: firstly right rotate and left rotate */
+				avl_tree_right_rotate(&root, first_bf->left_child, sentinel);
+				avl_tree_left_rotate(&root,first_bf,sentinel)
+			}else{//R
+				/*RR type, just a  step: left rotate */
+				avl_tree_left_rotate(&root, first_bf, sentinel);
+			}
+		}
+		first_bf = avl_tree_back_track_recompute_children_height(root, node, sentinel);
+	}
 }
 
 /*delete a node from avl-tree */
@@ -44,31 +93,34 @@ avl_tree_delete(avl_tree_t *tree, avl_tree_node_t *node)
 }
 
 /*insert a node into tree in BST way*/
-void
-bst_insert_node(avl_tree_node_t *root, avl_tree_node_t *node)
+avl_tree_node_t*
+bst_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 {
-	avl_tree_node_t *temp = root, *parent = NULL;
-	for(; temp != NULL; ){
+	avl_tree_node_t *temp = tree->root, *parent = NULL;
+	for(; temp != tree->sentinel; ){
 		parent = temp;
 		temp = temp->key > node->key? temp->left_child: temp->right_child;
 	}
 	 node->parent = parent;
 	 temp = node;
-	 node->left_child = node->right_child = NULL;
-	 node->left_height = node->right_height = 0;
+	 node->left_child = node->right_child = tree->sentinel;
+	 node->height = 1;
+
+	 /*recompute children' height in back-strack way*/
+	 return avl_tree_back_track_recompute_children_height(tree->root, node, tree->sentinel);
 }
 
 /*RR*/
 static inline void
-avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node)
+avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node_t *sentinel)
 {
-	if(NULL == *root || NULL == node){
+	if(sentinel == *root || sentinel == node){
 		return;
 	}
 	avl_tree_node_t *temp;
 	temp = node->right_child;
 
-	if(NULL != temp->left_child){
+	if(sentinel != temp->left_child){
 		temp->left_child->parent = node;
 	}
 
@@ -87,21 +139,20 @@ avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node)
 	node->parent = temp;
 
 	/*back-track algorithm recompute children' height */
-	avl_tree_back_track_recompute_children_height(root, node);
-
+	return avl_tree_back_track_recompute_children_height(*root, node, sentinel);
 }
 
 /*LL*/
 static inline void
-avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node)
+avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node_t *sentinel)
 {
-	if(NULL == *root || NULL == node){
+	if(sentinel == *root || sentinel == node){
 		return;
 	}
 	avl_tree_node_t *temp;
 	temp = node->left_child;
 
-	if(NULL != temp->right_child){
+	if(sentinel != temp->right_child){
 		temp->right_child->parent = node;
 	}
 	node->left_child = temp->right_child;
@@ -119,32 +170,36 @@ avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node)
 	node->parent = temp;
 
 	/*back-track algorithm recompute children' height */
-	avl_tree_back_track_recompute_children_height(root,node);
+	return avl_tree_back_track_recompute_children_height(*root, node, sentinel);
 }
 
 static inline int
-avl_tree_child_height_max(avl_tree_node_t *node)
+avl_tree_get_height(avl_tree_node_t *node, avl_tree_node_t *sentinel)
 {
-	int max = 0;
-	if(NULL == node){
+	int height = 1;
+	if(sentinel == node){
 		goto end;
 	}
-	int left_max = node->left_height, right_max = node->right_height;
-
-	max = left_max > right_max? left_max: right_max;
+	int left_height = node->left_child? node->left_child->height: 0; 
+	int right_height = node->right_child? node->right_child->height: 0;
+	height = (left_height > right_height? left_height: right_height) + 1;
 end:
-	return max;
+	return height;
 
 }
 
-static inline void
-avl_tree_back_track_recompute_children_height(avl_tree_node_t *root, avl_tree_node_t *current)
+static inline avl_tree_node_t*
+avl_tree_back_track_recompute_children_height(avl_tree_node_t *root, avl_tree_node_t *current, avl_tree_node_t *sentinel)
 {
-	do{
-		current->left_height = avl_tree_child_height_max(current->left_child);
-		current->right_height = avl_tree_child_height_max(current->right_child);
+	av_tree_node_t* first_bf = sentinel;
+	int left_height = 0, right_height = 0;
+	for(; current->parent != NULL ; ){
+		left_height = 0,right_height = 0;
+		current->height = avl_tree_get_height(current, sentinel);
+		if(abs(avl_tree_get_height(current->left_child,sentinel) - avl_tree_get_height(current->right_child,sentinel)) > 1 && first_bf == sentinel){
+			first_bf = current;
+		}
 		current = current->parent;
-	}while(root != current);
-	root->left_height = avl_tree_height_max(root->left_child);
-	root->right_height = avl_tree_height_max(root->right_child);
+	}
+	return first_bf;
 }
