@@ -14,9 +14,9 @@ struct avl_tree_node_s{
 	int 			height;
 };
 
+typedef struct avl_tree_s avl_tree_t;
 typedef avl_tree_node_t* (*avl_tree_node_insert_func)(avl_tree_t *tree, avl_tree_node_t *node);
 
-typedef struct avl_tree_s avl_tree_t;
 struct avl_tree_s{
 	avl_tree_node_t	*root;
 	avl_tree_node_t *sentinel;
