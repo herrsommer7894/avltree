@@ -98,21 +98,21 @@ avl_tree_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 
 	/* re-balance avl-tree if necessary */	
 	while(first_bf != sentinel){
-		if(avl_tree_get_height(first_bf->left_height, sentinel) > avl_tree_get_height(first_bf->right_height, sentinel)){//L
+		if(avl_tree_get_height(first_bf->left_child, sentinel) > avl_tree_get_height(first_bf->right_child, sentinel)){//L
 			temp = first_bf->left_child;
-			if(avl_tree_get_height(temp->left_height, sentinel) > avl_tree_get_height(temp->right_height, sentinel)){//L
+			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* LL type, just a step : right rotate */
 				avl_tree_right_rotate(&root, first_bf, sentinel);
 			}else{//R
 				/* LR type, two step : firstly left ratate and right rotate */
-				avl_tree_left_rotate(&root,first_bf->right_child,sentinel)
+				avl_tree_left_rotate(&root, first_bf->right_child, sentinel);
 				avl_tree_right_rotate(&root, first_bf, sentinel);
 			}
 		}else{//R
-			if(avl_tree_get_height(temp->left_height, sentinel) > avl_tree_get_height(temp->right_height, sentinel)){//L
+			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* RL type, two step: firstly right rotate and left rotate */
 				avl_tree_right_rotate(&root, first_bf->left_child, sentinel);
-				avl_tree_left_rotate(&root,first_bf,sentinel)
+				avl_tree_left_rotate(&root, first_bf, sentinel)
 			}else{//R
 				/* RR type, just a  step: left rotate */
 				avl_tree_left_rotate(&root, first_bf, sentinel);
@@ -171,21 +171,21 @@ avl_tree_delete_node(avl_tree_t *tree, avl_tree_node_t *node)
 		
 	/* re-balance avl-tree if necessary */	
 	while(first_bf != sentinel){
-		if(avl_tree_get_height(first_bf->left_height, sentinel) > avl_tree_get_height(first_bf->right_height, sentinel)){//L
+		if(avl_tree_get_height(first_bf->left_child, sentinel) > avl_tree_get_height(first_bf->right_child, sentinel)){//L
 			temp = first_bf->left_child;
-			if(avl_tree_get_height(temp->left_height, sentinel) > avl_tree_get_height(temp->right_height, sentinel)){//L
+			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* LL type, just a step : right rotate */
 				avl_tree_right_rotate(&root, first_bf, sentinel);
 			}else{//R
 				/* LR type, two step : firstly left ratate and right rotate */
-				avl_tree_left_rotate(&root,first_bf->right_child,sentinel)
+				avl_tree_left_rotate(&root, first_bf->right_child, sentinel);
 				avl_tree_right_rotate(&root, first_bf, sentinel);
 			}
 		}else{//R
-			if(avl_tree_get_height(temp->left_height, sentinel) > avl_tree_get_height(temp->right_height, sentinel)){//L
+			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* RL type, two step: firstly right rotate and left rotate */
 				avl_tree_right_rotate(&root, first_bf->left_child, sentinel);
-				avl_tree_left_rotate(&root,first_bf,sentinel)
+				avl_tree_left_rotate(&root, first_bf, sentinel)
 			}else{//R
 				/* RR type, just a  step: left rotate */
 				avl_tree_left_rotate(&root, first_bf, sentinel);
@@ -216,7 +216,7 @@ bst_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 
 /* left rotate */
 static inline void
-avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node_t *sentinel)
+avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_node_t *sentinel)
 {
 	if(sentinel == *root || sentinel == node){
 		return;
@@ -246,7 +246,7 @@ avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node
 
 /* right rotate */
 static inline void
-avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t node, avl_tree_node_t *sentinel)
+avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_node_t *sentinel)
 {
 	if(sentinel == *root || sentinel == node){
 		return;
@@ -293,7 +293,7 @@ end:
 static inline avl_tree_node_t*
 avl_tree_back_track_recompute_children_height(avl_tree_node_t *root, avl_tree_node_t *current, avl_tree_node_t *sentinel)
 {
-	av_tree_node_t* first_bf = sentinel;
+	avl_tree_node_t* first_bf = sentinel;
 	for(; current && current->parent != NULL ; ){
 		current->height = avl_tree_get_height(current, sentinel);
 		if(abs(avl_tree_get_height(current->left_child,sentinel) - avl_tree_get_height(current->right_child,sentinel)) > 1 && first_bf == sentinel){
@@ -318,7 +318,7 @@ avl_tree_middle_travel_get_post_node(avl_tree_node_t *start, avl_tree_node_t *se
 static inline avl_tree_node_t*
 vl_tree_find_node(avl_tree_node_t *root, int key, avl_tree_node_t *sentinel)
 {
-	avl_tree_node_t *temp = root, ret = sentinel;
+	avl_tree_node_t *temp = root, *ret = sentinel;
 
 	for( ; temp && temp != sentinel; ){
 		if(temp->key == key ){
