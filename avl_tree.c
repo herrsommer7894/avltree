@@ -224,11 +224,12 @@ avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_nod
 	avl_tree_node_t *temp;
 	temp = node->right_child;
 
+	node->right_child = temp->left_child;
 	if(sentinel != temp->left_child){
 		temp->left_child->parent = node;
 	}
 
-	node->right_child = temp->left_child;
+	temp->parent = node->parent;
 
 	if(node == *root){
 		*root = temp;
@@ -238,7 +239,6 @@ avl_tree_left_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_nod
 		node->parent->right_child = temp;
 	}
 
-	temp->parent = node->parent;
 	temp->left_child = node;
 	node->parent = temp;
 
@@ -254,11 +254,12 @@ avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_no
 	avl_tree_node_t *temp;
 	temp = node->left_child;
 
+	node->left_child = temp->right_child;
 	if(sentinel != temp->right_child){
 		temp->right_child->parent = node;
 	}
 	
-	node->left_child = temp->right_child;
+	temp->parent = node->parent;
 
 	if(node == *root){
 		*root = temp;
@@ -268,7 +269,6 @@ avl_tree_right_rotate(avl_tree_node_t **root, avl_tree_node_t *node, avl_tree_no
 		node->parent->right_child = temp;
 	}
 
-	temp->parent = node->parent;
 	temp->right_child = node;
 	node->parent = temp;
 }
