@@ -80,7 +80,7 @@ avl_tree_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 	if(NULL == tree){
 		return -1;
 	}
-	avl_tree_node_t *sentinel, *temp, *root, *first_bf;
+	avl_tree_node_t *sentinel, *temp, *root, *first_bf, *parent;
 
 	sentinel = tree->sentinel;
 	root = tree->root;
@@ -98,8 +98,11 @@ avl_tree_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 
 	/* re-balance avl-tree if necessary */	
 	while(first_bf != sentinel){
+		parent = first_bf->parent;
+
 		if(avl_tree_get_height(first_bf->left_child, sentinel) > avl_tree_get_height(first_bf->right_child, sentinel)){//L
 			temp = first_bf->left_child;
+
 			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* LL type, just a step : right rotate */
 				avl_tree_right_rotate(&root, first_bf, sentinel);
@@ -109,6 +112,7 @@ avl_tree_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 				avl_tree_right_rotate(&root, first_bf, sentinel);
 			}
 		}else{//R
+
 			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* RL type, two step: firstly right rotate and left rotate */
 				avl_tree_right_rotate(&root, first_bf->left_child, sentinel);
@@ -119,7 +123,7 @@ avl_tree_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 			}
 		}
 		/* via back-track algorithm to recompute children' height and get other unbalanced node */
-		first_bf = avl_tree_back_track_recompute_children_height(root, node, sentinel);
+		first_bf = avl_tree_back_track_recompute_children_height(root, parent, sentinel);
 	}
 
 	return 0;
@@ -129,7 +133,7 @@ avl_tree_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 int
 avl_tree_delete_node(avl_tree_t *tree, avl_tree_node_t *node)
 {
-	avl_tree_node_t *root, *sentinel, *temp, *first_bf;
+	avl_tree_node_t *root, *sentinel, *temp, *first_bf, *parent;
 	if(NULL == tree || NULL == node){
 		return -1;
 	}
@@ -171,8 +175,11 @@ avl_tree_delete_node(avl_tree_t *tree, avl_tree_node_t *node)
 		
 	/* re-balance avl-tree if necessary */	
 	while(first_bf != sentinel){
+		parent = first_bf->parent;
+
 		if(avl_tree_get_height(first_bf->left_child, sentinel) > avl_tree_get_height(first_bf->right_child, sentinel)){//L
 			temp = first_bf->left_child;
+
 			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* LL type, just a step : right rotate */
 				avl_tree_right_rotate(&root, first_bf, sentinel);
@@ -182,6 +189,7 @@ avl_tree_delete_node(avl_tree_t *tree, avl_tree_node_t *node)
 				avl_tree_right_rotate(&root, first_bf, sentinel);
 			}
 		}else{//R
+		
 			if(avl_tree_get_height(temp->left_child, sentinel) > avl_tree_get_height(temp->right_child, sentinel)){//L
 				/* RL type, two step: firstly right rotate and left rotate */
 				avl_tree_right_rotate(&root, first_bf->left_child, sentinel);
@@ -192,7 +200,7 @@ avl_tree_delete_node(avl_tree_t *tree, avl_tree_node_t *node)
 			}
 		}
 		/* via back-track algorithm to recompute children' height and get other unbalanced node */
-		first_bf = avl_tree_back_track_recompute_children_height(root, node, sentinel);
+		first_bf = avl_tree_back_track_recompute_children_height(root, parent, sentinel);
 	}
 
 	return 0;
@@ -281,9 +289,9 @@ avl_tree_get_height(avl_tree_node_t *node, avl_tree_node_t *sentinel)
 	if(sentinel == node){
 		goto end;
 	}
-	int left_height = node->left_child? node->left_child->height: 0; 
-	int right_height = node->right_child? node->right_child->height: 0;
-	height = (left_height > right_height? left_height: right_height) + 1;
+	int left_height = node->left_child ? node->left_child->height : 0; 
+	int right_height = node->right_child ? node->right_child->height : 0;
+	height = (left_height > right_height ? left_height : right_height) + 1;
 end:
 	return height;
 
