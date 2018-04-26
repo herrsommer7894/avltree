@@ -39,6 +39,7 @@ avl_tree_init(avl_tree_t *tree, avl_tree_node_t *sentinel, avl_tree_node_insert_
 	tree->sentinel = sentinel;
 	tree->insert_func = i_func;
 	tree->root = sentinel;
+	return 0;
 }
 
 /* insert a key into avl-tree */
