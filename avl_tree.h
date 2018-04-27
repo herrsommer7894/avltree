@@ -15,12 +15,10 @@ struct avl_tree_node_s{
 };
 
 typedef struct avl_tree_s avl_tree_t;
-typedef avl_tree_node_t* (*avl_tree_node_insert_func)(avl_tree_t *tree, avl_tree_node_t *node);
 
 struct avl_tree_s{
 	avl_tree_node_t	*root;
 	avl_tree_node_t *sentinel;
-	avl_tree_node_insert_func insert_func;
 };
 
 /*  
@@ -29,7 +27,7 @@ struct avl_tree_s{
 */
 
 /* init a avl-tree */
-int avl_tree_init(avl_tree_t *tree, avl_tree_node_t *sentinel, avl_tree_node_insert_func i_func);
+int avl_tree_init(avl_tree_t *tree, avl_tree_node_t *sentinel);
 
 /* insert a key into avl-tree */
 int avl_tree_insert_key(avl_tree_t *tree, int key);

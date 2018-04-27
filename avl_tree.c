@@ -28,16 +28,18 @@ static inline avl_tree_node_t* avl_tree_middle_travel_get_post_node(avl_tree_nod
 
 static inline avl_tree_node_t* avl_tree_find_node(avl_tree_node_t *root, int key, avl_tree_node_t *sentinel);
 
+static inline avl_tree_node_t *bst_insert_node(avl_tree_t *tree, avl_tree_node_t *node);
+
+
 /*init a avl-tree root*/
 int
-avl_tree_init(avl_tree_t *tree, avl_tree_node_t *sentinel, avl_tree_node_insert_func i_func)
+avl_tree_init(avl_tree_t *tree, avl_tree_node_t *sentinel)
 {
 	if(NULL == tree){
 		return -1;
 	}
 	avl_tree_init_sentinel(sentinel);
 	tree->sentinel = sentinel;
-	tree->insert_func = i_func;
 	tree->root = sentinel;
 	return 0;
 }
@@ -94,7 +96,7 @@ avl_tree_insert_node(avl_tree_t *tree, avl_tree_node_t *node)
 		return 0;
 	}
 	/* insert a node using BST feature */
-	first_bf = tree->insert_func(tree, node);
+	first_bf = bst_insert_node(tree, node);
 
 	/* re-balance avl-tree if necessary */	
 	while(first_bf != sentinel){
