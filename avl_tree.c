@@ -164,10 +164,18 @@ avl_tree_delete_node(avl_tree_t *tree, avl_tree_node_t *node)
 		node->right_child->parent = node->parent;
 	}else{	/* the would-be deleted node both have two nodes */
 		temp = avl_tree_middle_travel_get_post_node(node->right_child, sentinel);
+		
+		if(temp ->left_child != sentinel){
+			temp = temp->left_child;
+			/* delete temp */
+			temp->parent->left_child = sentinel;
+		}else{
+			temp = temp->right_child;
+			/* delete temp */
+			temp->parent->right_child = sentinel;
+		}
 		/* exchange key */
 		node->key = temp->key;
-		/* delete temp */
-		temp->parent->left_child = temp->left_child;
 		temp->parent = NULL;
 	}
 	/* via back-track algorithm to recompute children' height and get other unbalanced node */
