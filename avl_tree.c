@@ -327,7 +327,7 @@ static inline avl_tree_node_t*
 avl_tree_middle_travel_get_post_node(avl_tree_node_t *start, avl_tree_node_t *sentinel)
 {
 	avl_tree_node_t *temp = start;
-	for( ; temp && temp->left_child != sentinel ; ){
+	for( ; temp && temp != sentinel && temp->left_child != sentinel ; ){
 		temp = temp->left_child;
 	}
 	return temp;
